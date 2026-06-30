@@ -281,7 +281,7 @@ function LandlordDashboard() {
       <h2 style={{ fontSize: '2rem', fontWeight: '700', marginBottom: '2rem' }}>Tenants Management</h2>
       <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem' }}>
         <h3 style={{ marginBottom: '1.5rem' }}>Add New Tenant</h3>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.9rem' }}>Tenant password will be the last 4 digits of their phone number.</p>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.9rem' }}>The tenant's initial password will be their full phone number. They can change it after logging in.</p>
         <form onSubmit={e => { e.preventDefault(); addTenant(tForm); setTForm({roomId:'', name:'', fatherName:'', phone:'', whatsapp:'', notes:'', joinDate: new Date().toISOString().split('T')[0]}); alert('Tenant Added successfully!'); }} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           
           <select className="input-field" value={tForm.roomId} onChange={e => setTForm({...tForm, roomId: e.target.value})} required style={{background: 'var(--bg-card)'}}>

@@ -1,16 +1,59 @@
-# React + Vite
+# Rent Management CMS
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web app for landlords to manage buildings, rooms, tenants, and monthly
+rent + electricity invoices, with a separate tenant portal for viewing bills
+and submitting payments.
 
-Currently, two official plugins are available:
+**Live:** https://rental-management-cms.vercel.app/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech stack
 
-## React Compiler
+- **Vite** + **React 19**
+- **react-router-dom 7** for routing
+- **lucide-react** for icons
+- State in React Context (`src/context/AppContext.jsx`)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+> ⚠️ **Current data storage:** the app currently persists all data in the
+> browser's `localStorage`. This means data is per-device and not shared
+> between the landlord and tenants. Migrating to a real backend
+> (Supabase) is in progress.
 
-## Expanding the ESLint configuration
+## Roles & login
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Landlord:** username `landlord`, password `123456`
+- **Tenant:** logs in with their phone number; the initial password is their
+  full phone number (changeable after login).
+
+## Routes
+
+- `/login` — login (landlord / tenant tabs)
+- `/landlord` — landlord dashboard
+- `/tenant` — tenant portal
+
+## Project structure
+
+```
+src/
+  main.jsx                 App entry
+  App.jsx                  Routes + ErrorBoundary + AppProvider
+  context/AppContext.jsx   All state + business logic
+  pages/
+    Login.jsx
+    LandlordDashboard.jsx
+    TenantDashboard.jsx
+  index.css                Global theme (dark glassmorphism)
+```
+
+## Develop
+
+```bash
+npm install
+npm run dev      # start dev server
+npm run build    # production build
+npm run preview  # preview the build
+```
+
+## Deploy
+
+Hosted on Vercel. Pushing to the connected GitHub repository triggers an
+automatic deployment.
