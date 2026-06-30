@@ -4,6 +4,11 @@ dist
 *.local
 .DS_Store
 
+# Secrets — never commit real keys
+.env
+.env.*
+!.env.example
+
 # Local machine-specific dev helpers (portable Node paths)
 .claude/launch.json
 run-dev.cmd
