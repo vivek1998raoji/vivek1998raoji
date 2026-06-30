@@ -114,7 +114,7 @@ function LandlordDashboard() {
         </div>
       )}
       
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+      <div className="stat-grid" style={{ marginBottom: '2rem' }}>
         <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
            <h3 style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Total Amount Received</h3>
            <h2 style={{ fontSize: '2rem', color: '#34D399' }}>₹{totalReceived.toFixed(2)}</h2>
@@ -133,7 +133,7 @@ function LandlordDashboard() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+      <div className="stat-grid">
         <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
            <h3 style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Total Buildings</h3>
            <h2 style={{ fontSize: '2rem' }}>{totalBuildings}</h2>
@@ -154,7 +154,7 @@ function LandlordDashboard() {
     <div className="fade-in">
       <h2 style={{ fontSize: '2rem', fontWeight: '700', marginBottom: '2rem' }}>Buildings & Rooms</h2>
       
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+      <div className="two-col">
         {/* Buildings Form */}
         <div className="glass-panel" style={{ padding: '2rem' }}>
           <h3 style={{ marginBottom: '1.5rem' }}>Add Building</h3>
@@ -212,8 +212,8 @@ function LandlordDashboard() {
 
       {/* Edit Building Modal */}
       {editingBuilding && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="glass-panel fade-in" style={{ padding: '2.5rem', width: '500px', background: '#0F172A' }}>
+        <div className="modal-overlay">
+          <div className="glass-panel fade-in modal-card" style={{ padding: '2.5rem', background: '#0F172A' }}>
             <h2 style={{ marginBottom: '1.5rem' }}>Edit Building Details</h2>
             <form onSubmit={e => { e.preventDefault(); updateBuilding(editingBuilding.id, editingBuilding); setEditingBuilding(null); alert('Building updated.'); }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -237,8 +237,8 @@ function LandlordDashboard() {
 
       {/* Edit Room Modal */}
       {editingRoom && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="glass-panel fade-in" style={{ padding: '2.5rem', width: '500px', background: '#0F172A' }}>
+        <div className="modal-overlay">
+          <div className="glass-panel fade-in modal-card" style={{ padding: '2.5rem', background: '#0F172A' }}>
             <h2 style={{ marginBottom: '1.5rem' }}>Edit Room Details</h2>
             <form onSubmit={e => { e.preventDefault(); updateRoom(editingRoom.id, editingRoom); setEditingRoom(null); alert('Room updated.'); }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -282,7 +282,7 @@ function LandlordDashboard() {
       <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem' }}>
         <h3 style={{ marginBottom: '1.5rem' }}>Add New Tenant</h3>
         <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.9rem' }}>The tenant's initial password will be their full phone number. They can change it after logging in.</p>
-        <form onSubmit={e => { e.preventDefault(); addTenant(tForm); setTForm({roomId:'', name:'', fatherName:'', phone:'', whatsapp:'', notes:'', joinDate: new Date().toISOString().split('T')[0]}); alert('Tenant Added successfully!'); }} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <form onSubmit={e => { e.preventDefault(); addTenant(tForm); setTForm({roomId:'', name:'', fatherName:'', phone:'', whatsapp:'', notes:'', joinDate: new Date().toISOString().split('T')[0]}); alert('Tenant Added successfully!'); }} className="form-grid">
           
           <select className="input-field" value={tForm.roomId} onChange={e => setTForm({...tForm, roomId: e.target.value})} required style={{background: 'var(--bg-card)'}}>
             <option value="">Assign to Room...</option>
@@ -316,7 +316,7 @@ function LandlordDashboard() {
       </div>
 
       <h3 style={{ marginBottom: '1rem' }}>Active Tenants</h3>
-      <div className="glass-panel" style={{ overflow: 'hidden' }}>
+      <div className="glass-panel table-wrap">
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border)', background: 'rgba(15, 23, 42, 0.4)' }}>
@@ -351,8 +351,8 @@ function LandlordDashboard() {
 
       {/* Edit Tenant Modal */}
       {editingTenant && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="glass-panel fade-in" style={{ padding: '2.5rem', width: '500px', background: '#0F172A' }}>
+        <div className="modal-overlay">
+          <div className="glass-panel fade-in modal-card" style={{ padding: '2.5rem', background: '#0F172A' }}>
             <h2 style={{ marginBottom: '1.5rem' }}>Edit Tenant Details</h2>
             <form onSubmit={e => { e.preventDefault(); updateTenant(editingTenant.id, editingTenant); setEditingTenant(null); alert('Tenant updated.'); }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -388,8 +388,8 @@ function LandlordDashboard() {
 
       {/* Deactivate Tenant Modal */}
       {deactivatingTenant && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="glass-panel fade-in" style={{ padding: '2.5rem', width: '500px', background: '#0F172A', border: '1px solid rgba(239, 68, 68, 0.5)' }}>
+        <div className="modal-overlay">
+          <div className="glass-panel fade-in modal-card" style={{ padding: '2.5rem', background: '#0F172A', border: '1px solid rgba(239, 68, 68, 0.5)' }}>
             <h2 style={{ marginBottom: '0.5rem', color: '#F87171' }}>Evict / Deactivate Tenant</h2>
             <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>This calculates their final bill, vacates Room {rooms.find(r=>r.id===deactivatingTenant.roomId)?.roomNumber}, and removes them from active rosters.</p>
             <form onSubmit={e => { 
@@ -423,8 +423,8 @@ function LandlordDashboard() {
 
       {/* History Modal */}
       {historyTenant && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="glass-panel fade-in" style={{ padding: '2.5rem', width: '700px', maxHeight: '80vh', overflowY: 'auto', background: '#0F172A' }}>
+        <div className="modal-overlay">
+          <div className="glass-panel fade-in modal-card wide" style={{ padding: '2.5rem', background: '#0F172A' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                <h2 style={{ fontSize: '1.5rem' }}>Payment History: {historyTenant.name}</h2>
                <button className="btn btn-secondary" style={{padding: '0.5rem'}} onClick={() => setHistoryTenant(null)}>Close</button>
@@ -481,7 +481,7 @@ function LandlordDashboard() {
             if (res?.error) { alert(res.error); return; }
             alert('Invoice generated and sent to tenant!');
             setInvForm({...invForm, currentMeter:'', waterBill:'', otherCharges:''});
-          }} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          }} className="form-grid">
           
           <select className="input-field" value={invForm.roomId} onChange={e => setInvForm({...invForm, roomId: e.target.value})} required style={{background: 'var(--bg-card)'}}>
             <option value="">Select Occupied Room...</option>
@@ -507,7 +507,7 @@ function LandlordDashboard() {
       </div>
 
       <h3 style={{ marginBottom: '1rem' }}>Recent Invoices Issued</h3>
-      <div className="glass-panel" style={{ overflow: 'hidden' }}>
+      <div className="glass-panel table-wrap">
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border)', background: 'rgba(15, 23, 42, 0.4)' }}>
@@ -599,10 +599,10 @@ function LandlordDashboard() {
   );
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
+    <div className="dash-layout">
       {/* Sidebar */}
-      <div className="glass-panel" style={{ width: '280px', margin: '1rem', display: 'flex', flexDirection: 'column', padding: '1.5rem', borderRadius: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '3rem' }}>
+      <div className="glass-panel dash-sidebar" style={{ margin: '1rem', display: 'flex', flexDirection: 'column', padding: '1.5rem', borderRadius: '24px' }}>
+        <div className="sidebar-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '3rem' }}>
           <div style={{ background: 'var(--primary)', padding: '0.5rem', borderRadius: '10px' }}>
             <Home size={24} color="white" />
           </div>
@@ -617,7 +617,7 @@ function LandlordDashboard() {
           <NavItem tabId="requests" icon={ClipboardList} label="Payment Requests" />
         </nav>
 
-        <div style={{ marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
+        <div className="signout" style={{ marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
           <button onClick={handleLogout} className="btn" style={{ width: '100%', background: 'transparent', color: 'var(--text-muted)', justifyContent: 'flex-start', padding: '1rem' }}>
             <LogOut size={20} /> Sign Out
           </button>
@@ -625,7 +625,7 @@ function LandlordDashboard() {
       </div>
 
       {/* Main Content Area */}
-      <div style={{ flex: 1, padding: '2rem 3rem', height: '100vh', overflowY: 'auto' }}>
+      <div className="dash-main">
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'buildings' && renderBuildingsAndRooms()}
         {activeTab === 'tenants' && renderTenants()}

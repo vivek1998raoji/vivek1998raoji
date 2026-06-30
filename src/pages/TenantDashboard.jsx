@@ -102,10 +102,10 @@ function TenantDashboard() {
   );
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
+    <div className="dash-layout">
       {/* Sidebar */}
-      <div className="glass-panel" style={{ width: '280px', margin: '1rem', display: 'flex', flexDirection: 'column', padding: '1.5rem', borderRadius: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '3rem' }}>
+      <div className="glass-panel dash-sidebar" style={{ margin: '1rem', display: 'flex', flexDirection: 'column', padding: '1.5rem', borderRadius: '24px' }}>
+        <div className="sidebar-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '3rem' }}>
           <div style={{ background: 'var(--secondary)', padding: '0.5rem', borderRadius: '10px' }}>
             <Home size={24} color="white" />
           </div>
@@ -118,7 +118,7 @@ function TenantDashboard() {
           <NavItem tabId="lease" icon={FileText} label="Lease Details" />
         </nav>
 
-        <div style={{ marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
+        <div className="signout" style={{ marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
           <button onClick={handleLogout} className="btn" style={{ width: '100%', background: 'transparent', color: 'var(--text-muted)', justifyContent: 'flex-start', padding: '1rem' }}>
             <LogOut size={20} /> Sign Out
           </button>
@@ -126,8 +126,8 @@ function TenantDashboard() {
       </div>
 
       {/* Main Content Areas */}
-      <div style={{ flex: 1, padding: '2rem 3rem', height: '100vh', overflowY: 'auto', position: 'relative' }}>
-        <header style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="dash-main" style={{ position: 'relative' }}>
+        <header style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <h2 style={{ fontSize: '2rem', fontWeight: '700', marginBottom: '0.25rem' }}>Hello, {tenant.name}!</h2>
             <p style={{ color: 'var(--text-muted)' }}>Room {room?.roomNumber} at {building?.name}.</p>
@@ -152,7 +152,7 @@ function TenantDashboard() {
                  )}
                </div>
                
-               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+               <div className="form-grid">
                  <div>
                    <label className="input-label">Full Name</label>
                    {profileEdit ? <input className="input-field" value={profileForm.name} onChange={e => setProfileForm({...profileForm, name: e.target.value})} required/> : <div className="input-field" style={{background: 'rgba(255,255,255,0.05)'}}>{tenant.name}</div>}
@@ -183,7 +183,7 @@ function TenantDashboard() {
         )}
 
         {activeTab === 'payments' && (
-          <div className="fade-in" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+          <div className="fade-in two-col">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               {/* Payment Due Card */}
               {currentUnpaid ? (
@@ -223,7 +223,7 @@ function TenantDashboard() {
 
               {/* Recent Payments History */}
               <h3 style={{ fontSize: '1.5rem', fontWeight: '600', marginTop: '1rem' }}>Payment History</h3>
-              <div className="glass-panel" style={{ overflow: 'hidden' }}>
+              <div className="glass-panel table-wrap">
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                   <tbody>
                     {tenantInvoices.map((tx, i) => (
@@ -261,7 +261,7 @@ function TenantDashboard() {
 
         {/* Change Password Modal */}
         {pwModal.open && (
-           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+           <div className="modal-overlay">
              <div className="glass-panel fade-in" style={{ padding: '2.5rem', maxWidth: '400px', width: '90%', background: '#0F172A' }}>
                <h2 style={{ marginBottom: '1.5rem' }}>Change Password</h2>
                <form onSubmit={handlePasswordChange}>
@@ -286,7 +286,7 @@ function TenantDashboard() {
 
         {/* Payment Modal Overlay */}
         {payModal.open && currentUnpaid && (
-           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+           <div className="modal-overlay">
              <div className="glass-panel fade-in" style={{ padding: '2.5rem', maxWidth: '400px', width: '90%', background: '#0F172A' }}>
                <h2 style={{ marginBottom: '1.5rem' }}>Confirm Payment</h2>
                

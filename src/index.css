@@ -150,3 +150,41 @@ body {
 .badge-success { background: rgba(16, 185, 129, 0.2); color: #34D399; }
 .badge-warning { background: rgba(245, 158, 11, 0.2); color: #FBBF24; }
 .badge-danger { background: rgba(239, 68, 68, 0.2); color: #F87171; }
+
+/* ----------------------------------------------------------------------
+   Responsive layout helpers
+   These use !important so they reliably override the inline styles used
+   throughout the dashboards.
+   ---------------------------------------------------------------------- */
+
+/* Auto-flowing card grids (replace fixed repeat(N,1fr) so they reflow) */
+.stat-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important; }
+.form-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)) !important; }
+.two-col   { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important; }
+
+/* Wide tables scroll horizontally instead of overflowing the screen */
+.table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-wrap > table { min-width: 520px; }
+
+/* Modal that fits small screens */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.modal-card { width: min(560px, 100%); max-height: 90vh; overflow-y: auto; }
+.modal-card.wide { width: min(720px, 100%); }
+
+/* Dashboard shell: sidebar + main. Stacks on small screens. */
+.dash-layout { display: flex; min-height: 100vh; width: 100%; }
+.dash-sidebar { width: 280px; flex-shrink: 0; }
+.dash-main { flex: 1; min-width: 0; padding: 2rem 3rem; height: 100vh; overflow-y: auto; }
+
+@media (max-width: 860px) {
+  .dash-layout { flex-direction: column !important; }
+  .dash-sidebar { width: auto !important; margin: 0.75rem !important; margin-bottom: 0 !important; }
+  .dash-sidebar nav { flex-direction: row !important; flex: initial !important; overflow-x: auto; gap: 0.5rem; margin-bottom: 0.5rem; }
+  .dash-sidebar .sidebar-brand { margin-bottom: 1rem !important; }
+  .dash-sidebar .signout { margin-top: 0 !important; border-top: none !important; padding-top: 0 !important; }
+  .dash-main { height: auto !important; padding: 1.25rem 1rem !important; }
+}
+
+@media (max-width: 560px) {
+  .dash-main h2 { font-size: 1.5rem !important; }
+}
