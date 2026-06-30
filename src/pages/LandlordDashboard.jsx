@@ -475,7 +475,13 @@ function LandlordDashboard() {
         <h3 style={{ marginBottom: '1.5rem' }}>Generate Monthly Bill</h3>
         <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Other charges are optional.</p>
         
-        <form onSubmit={e => { e.preventDefault(); generateInvoice(invForm.roomId, invForm.currentMeter, invForm.waterBill, invForm.otherCharges, invForm.month, invForm.year); alert('Invoice Sent to Tenant!'); setInvForm({...invForm, currentMeter:'', waterBill:'', otherCharges:''}); }} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <form onSubmit={e => {
+            e.preventDefault();
+            const res = generateInvoice(invForm.roomId, invForm.currentMeter, invForm.waterBill, invForm.otherCharges, invForm.month, invForm.year);
+            if (res?.error) { alert(res.error); return; }
+            alert('Invoice generated and sent to tenant!');
+            setInvForm({...invForm, currentMeter:'', waterBill:'', otherCharges:''});
+          }} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           
           <select className="input-field" value={invForm.roomId} onChange={e => setInvForm({...invForm, roomId: e.target.value})} required style={{background: 'var(--bg-card)'}}>
             <option value="">Select Occupied Room...</option>
@@ -525,7 +531,7 @@ function LandlordDashboard() {
                   </td>
                   <td style={{ padding: '1rem', fontWeight: 'bold' }}>₹{inv.totalAmount}</td>
                   <td style={{ padding: '1rem' }}>
-                    <span className={`badge ${inv.status === 'paid' ? 'badge-success' : inv.status === 'partially_paid' ? 'badge-warning' : 'badge-danger'}`}>
+                    <span className={`badge ${inv.status === 'paid' ? 'badge-success' : inv.status === 'partially_paid' ? 'badge-warning' : inv.status === 'rolled_over' ? '' : 'badge-danger'}`}>
                       {inv.status.replace('_', ' ').toUpperCase()}
                     </span>
                   </td>

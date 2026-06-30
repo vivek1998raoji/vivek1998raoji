@@ -3,3 +3,8 @@ dist
 .vercel
 *.local
 .DS_Store
+
+# Local machine-specific dev helpers (portable Node paths)
+.claude/launch.json
+run-dev.cmd
+dev.log

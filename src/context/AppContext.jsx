@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { calcMonthlyCharges, applyPayment, isOpenInvoice, round2 } from '../lib/billing';
 
 export const AppContext = createContext();
 
@@ -117,47 +118,63 @@ export const AppProvider = ({ children }) => {
 
   const generateInvoice = (roomId, newMeterReading, waterBill, otherCharges, month, year) => {
     const room = rooms.find(r => r.id === roomId);
-    const building = buildings.find(b => b.id === room.buildingId);
     const tenant = tenants.find(t => t.roomId === roomId && t.isActive);
 
-    if (!room || !tenant) return null;
+    if (!room || !tenant) {
+      return { error: 'No active tenant found for this room.' };
+    }
+    if (!month || String(month).trim() === '') {
+      return { error: 'Please enter the billing month.' };
+    }
+    const building = buildings.find(b => b.id === room.buildingId);
 
-    const currentM = Number(newMeterReading) || 0;
-    const prevM = Number(room.currentMeterReading) || 0;
-    const unitsUsed = currentM - prevM;
-    const elecRate = Number(building.electricityRate) || 0;
-    
-    const electricityBill = unitsUsed * elecRate;
-    const wBill = Number(waterBill) || 0;
-    const oCharges = Number(otherCharges) || 0;
-    const prevPen = Number(tenant.balancePending) || 0;
-    const baseRent = Number(room.rentAmount) || 0;
+    // Validated, pure charge calculation (excludes previous pending).
+    const calc = calcMonthlyCharges({
+      baseRent: room.rentAmount,
+      prevMeter: room.currentMeterReading,
+      newMeter: newMeterReading,
+      electricityRate: building?.electricityRate,
+      waterBill,
+      otherCharges,
+    });
+    if (calc.error) return { error: calc.error };
 
-    // Proper math execution
-    const totalAmount = baseRent + electricityBill + wBill + oCharges + prevPen;
+    const prevPen = round2(tenant.balancePending);
+    const totalAmount = round2(calc.charges + prevPen);
 
     const invoice = {
       id: `inv${Date.now()}`,
       tenantId: tenant.id,
       roomId: room.id,
       month, year,
-      baseRent,
-      previousMeter: prevM,
-      currentMeter: currentM,
-      unitsUsed,
-      electricityBill,
-      waterBill: wBill,
-      otherCharges: oCharges,
+      baseRent: calc.baseRent,
+      previousMeter: calc.prevMeter,
+      currentMeter: calc.currentMeter,
+      unitsUsed: calc.unitsUsed,
+      electricityBill: calc.electricityBill,
+      waterBill: calc.waterBill,
+      otherCharges: calc.otherCharges,
       previousPending: prevPen,
       totalAmount,
       amountPaid: 0,
       previousPendingCarry: totalAmount, // Initial carry is total unpaid
-      status: 'pending' 
+      status: 'pending'
     };
 
-    setInvoices([...invoices, invoice]);
-    setRooms(rooms.map(r => r.id === roomId ? { ...r, currentMeterReading: currentM } : r));
+    // Any of this tenant's still-open invoices have now been folded into the
+    // new invoice's "previousPending", so close them out as rolled_over to
+    // avoid double-counting the same debt across two invoices.
+    setInvoices([
+      ...invoices.map(inv =>
+        inv.tenantId === tenant.id && isOpenInvoice(inv)
+          ? { ...inv, status: 'rolled_over' }
+          : inv
+      ),
+      invoice,
+    ]);
+    setRooms(rooms.map(r => r.id === roomId ? { ...r, currentMeterReading: calc.currentMeter } : r));
     setTenants(tenants.map(t => t.id === tenant.id ? { ...t, balancePending: invoice.previousPendingCarry } : t));
+    return { invoice };
   };
 
   const submitPaymentRequest = (invoiceId, amount, method, screenshot = 'attached_receipt.jpg') => {
@@ -171,25 +188,20 @@ export const AppProvider = ({ children }) => {
     const invoice = invoices.find(i => i.id === invoiceId);
     if (!invoice) return;
 
-    const paidAmount = Number(invoice.requestedAmount);
-    let newCarry = Math.round((Number(invoice.totalAmount) - paidAmount) * 100) / 100;
-    if (newCarry < 0.01) newCarry = 0; // Absolute clamp
-    
-    // Update invoice
+    // Accumulate this payment onto whatever was already paid (fixes losing an
+    // earlier partial payment on the second installment).
+    const result = applyPayment(invoice, invoice.requestedAmount);
+
     const updatedInvoices = invoices.map(inv => {
       if (inv.id === invoiceId) {
-        return { 
-          ...inv, 
-          amountPaid: paidAmount, 
-          previousPendingCarry: newCarry,
-          status: newCarry > 0 ? 'partially_paid' : 'paid' 
-        };
+        const { requestedAmount, ...rest } = inv; // clear the handled request
+        return { ...rest, ...result };
       }
       return inv;
     });
 
     setInvoices(updatedInvoices);
-    setTenants(tenants.map(t => t.id === invoice.tenantId ? { ...t, balancePending: newCarry } : t));
+    setTenants(tenants.map(t => t.id === invoice.tenantId ? { ...t, balancePending: result.previousPendingCarry } : t));
   };
 
   const deactivateTenant = (tenantId, leaveDate, finalMeter, additionalCharges) => {
@@ -226,7 +238,15 @@ export const AppProvider = ({ children }) => {
           previousPendingCarry: totalAmount, status: 'pending',
           isFinalBill: true
         };
-        setInvoices(prev => [...prev, invoice]);
+        // Fold any still-open invoices into this final bill.
+        setInvoices(prev => [
+          ...prev.map(inv =>
+            inv.tenantId === tenant.id && isOpenInvoice(inv)
+              ? { ...inv, status: 'rolled_over' }
+              : inv
+          ),
+          invoice,
+        ]);
       }
       setRooms(rooms.map(r => r.id === room.id ? { ...r, status: 'vacant', currentMeterReading: currentM } : r));
     }
