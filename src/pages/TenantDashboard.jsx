@@ -254,7 +254,7 @@ function TenantDashboard() {
               {/* Payment History */}
               <h3 style={{ fontSize: '1.5rem', fontWeight: '700', marginTop: '1rem' }}>My Past Bills</h3>
               <div className="glass-panel table-wrap">
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                   <tbody>
                     {tenantInvoices.map((tx) => (
                       <tr key={tx.id} style={{ borderBottom: '1px solid var(--border)' }}>

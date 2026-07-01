@@ -413,7 +413,7 @@ function LandlordDashboard() {
         </div>
       </div>
       <div className="glass-panel table-wrap">
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ borderBottom: '2px solid var(--border)', background: ALT }}>
               <th style={{ padding: '1rem' }}>Name</th>
@@ -540,7 +540,7 @@ function LandlordDashboard() {
             {invoices.filter(i => i.tenantId === historyTenant.id).length === 0 ? (
                <p style={{color: 'var(--text-muted)'}}>No bills for this tenant yet.</p>
             ) : (
-               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+               <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                  <thead>
                    <tr style={{ borderBottom: '2px solid var(--border)' }}>
                      <th style={{ padding: '0.75rem' }}>Month</th>
@@ -646,7 +646,7 @@ function LandlordDashboard() {
         </div>
       </div>
       <div className="glass-panel table-wrap">
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ borderBottom: '2px solid var(--border)', background: ALT }}>
               <th style={{ padding: '1rem' }}>Room / Tenant</th>
