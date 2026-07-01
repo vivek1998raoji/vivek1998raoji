@@ -6,6 +6,27 @@ and submitting payments.
 
 **Live:** https://rental-management-cms.vercel.app/
 
+## Features
+
+**Landlord**
+- Dashboard with this-month collection, all-time received, pending, overdue,
+  and open-maintenance counters.
+- Buildings & rooms, tenants (with searchable roster and image document
+  uploads), and monthly billing with a month **dropdown** (no more free text).
+- Invoices: generate (auto rent + electricity + water/other + carried
+  balance), **edit** with automatic recalculation, **void**, or **delete** —
+  all keeping tenant balances in sync. Search, status filter, and **CSV export**.
+- Per-invoice **Print / Save-as-PDF** and **Send-on-WhatsApp** (pre-filled bill).
+- Payment requests with receipt preview + one-click accept (records a dated
+  **payment ledger**).
+- **Maintenance** tab to triage tenant-reported issues (open → in progress →
+  resolved).
+
+**Tenant**
+- Profile, bill breakdown with due date, partial or full **Pay Now** with
+  screenshot upload, downloadable bills, payment history.
+- **Maintenance** requests and a **Lease Details** view.
+
 ## Tech stack
 
 - **Vite** + **React 19**

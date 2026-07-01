@@ -52,6 +52,7 @@ create table if not exists public.tenants (
   leave_date date,
   is_active boolean not null default true,
   balance_pending numeric not null default 0,
+  docs jsonb not null default '[]'::jsonb, -- [{ name, path|dataUrl }]
   created_at timestamptz not null default now()
 );
 
@@ -77,8 +78,10 @@ create table if not exists public.invoices (
     check (status in ('pending','payment_requested','partially_paid','paid','rolled_over')),
   payment_method text,
   requested_amount numeric,
-  payment_screenshot text,
+  payment_screenshot jsonb, -- { name, path|dataUrl }
   is_final_bill boolean not null default false,
+  due_date date,
+  payments jsonb not null default '[]'::jsonb, -- [{ amount, date, method }]
   created_at timestamptz not null default now()
 );
 
@@ -175,3 +178,22 @@ create policy maint_tenant on public.maintenance_requests for all
   with check (exists (
     select 1 from public.tenants t where t.id = maintenance_requests.tenant_id and t.auth_user_id = auth.uid()
   ));
+
+-- ---------- Storage: private bucket for docs & payment screenshots ----
+-- Govt IDs and payment receipts. Private; the app reads them via signed URLs.
+insert into storage.buckets (id, name, public)
+  values ('tenant-files', 'tenant-files', false)
+  on conflict (id) do nothing;
+
+-- Landlord: full access to their bucket objects.
+drop policy if exists tenant_files_landlord on storage.objects;
+create policy tenant_files_landlord on storage.objects for all
+  using (bucket_id = 'tenant-files' and public.is_landlord())
+  with check (bucket_id = 'tenant-files' and public.is_landlord());
+
+-- Tenant: may upload (payment screenshots) and read files under a folder
+-- named after their own auth uid (path convention: "<auth_uid>/...").
+drop policy if exists tenant_files_self on storage.objects;
+create policy tenant_files_self on storage.objects for all
+  using (bucket_id = 'tenant-files' and (storage.foldername(name))[1] = auth.uid()::text)
+  with check (bucket_id = 'tenant-files' and (storage.foldername(name))[1] = auth.uid()::text);

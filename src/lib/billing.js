@@ -8,13 +8,25 @@ const STATUS = {
   PARTIAL: 'partially_paid',
   PAID: 'paid',
   ROLLED_OVER: 'rolled_over', // balance folded into a newer invoice
+  VOID: 'void', // cancelled by the landlord; excluded from all totals
 };
 
 export const OPEN_STATUSES = [STATUS.PENDING, STATUS.PARTIAL];
 
 // An invoice is "open" (still owed) only while pending or partially paid.
-// Rolled-over and paid invoices must NOT count toward outstanding balance.
+// Rolled-over, paid and voided invoices must NOT count toward outstanding
+// balance.
 export const isOpenInvoice = (inv) => OPEN_STATUSES.includes(inv?.status);
+
+// Total still owed by a tenant across all their open invoices. Used to
+// recompute a tenant's carried balance after an edit/void/delete.
+export function outstandingForTenant(invoices, tenantId) {
+  return round2(
+    (invoices || [])
+      .filter((i) => i && i.tenantId === tenantId && isOpenInvoice(i))
+      .reduce((sum, i) => sum + (Number(i.previousPendingCarry) || 0), 0),
+  );
+}
 
 /**
  * Compute the charge fields for a monthly invoice (excludes any previous
@@ -82,6 +94,59 @@ export function applyPayment(invoice, amount) {
     amountPaid,
     previousPendingCarry: carry,
     status: carry > 0 ? STATUS.PARTIAL : STATUS.PAID,
+  };
+}
+
+/**
+ * Recompute an invoice after the landlord edits its charge inputs
+ * (meter reading, water, other, rent). Keeps previousPending and amountPaid,
+ * re-derives electricity from the stored previousMeter + rate, and refreshes
+ * totalAmount / carry / status. Returns { error } on an invalid meter.
+ */
+export function recalcInvoice(invoice, patch, electricityRate) {
+  const prevMeter = round2(invoice?.previousMeter);
+  const newMeter =
+    patch?.currentMeter === undefined || patch?.currentMeter === ''
+      ? invoice?.currentMeter
+      : patch.currentMeter;
+
+  const calc = calcMonthlyCharges({
+    baseRent: patch?.baseRent ?? invoice?.baseRent,
+    prevMeter,
+    newMeter,
+    electricityRate: electricityRate ?? 0,
+    waterBill: patch?.waterBill ?? invoice?.waterBill,
+    otherCharges: patch?.otherCharges ?? invoice?.otherCharges,
+  });
+  if (calc.error) return { error: calc.error };
+
+  const previousPending = round2(invoice?.previousPending);
+  const totalAmount = round2(calc.charges + previousPending);
+  const payment = applyPayment({ totalAmount, amountPaid: 0 }, invoice?.amountPaid);
+
+  // Derive status from what has actually been paid: nothing paid -> pending,
+  // fully covered -> paid, otherwise partially paid. (applyPayment alone would
+  // mark an untouched invoice "partially_paid" whenever a balance remains.)
+  const status =
+    payment.amountPaid <= 0
+      ? STATUS.PENDING
+      : payment.previousPendingCarry > 0
+        ? STATUS.PARTIAL
+        : STATUS.PAID;
+
+  return {
+    ...invoice,
+    baseRent: calc.baseRent,
+    currentMeter: calc.currentMeter,
+    unitsUsed: calc.unitsUsed,
+    electricityBill: calc.electricityBill,
+    waterBill: calc.waterBill,
+    otherCharges: calc.otherCharges,
+    previousPending,
+    totalAmount,
+    amountPaid: payment.amountPaid,
+    previousPendingCarry: payment.previousPendingCarry,
+    status,
   };
 }
 
