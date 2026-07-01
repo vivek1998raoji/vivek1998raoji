@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Home, Users, DollarSign, Bell, LogOut, CheckCircle, Plus, FileText, ClipboardList, PenSquare, MessageCircle, Printer, Trash2, Ban, Search, Wrench, Download } from 'lucide-react';
+import { Home, Users, DollarSign, Bell, LogOut, CheckCircle, Plus, FileText, ClipboardList, PenSquare, MessageCircle, Printer, Trash2, Ban, Search, Wrench, Download, Settings, KeyRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import { MONTHS, formatMoney, formatDate, currentMonthName, currentYear, daysBetween, statusLabel } from '../lib/format';
@@ -42,11 +42,17 @@ function LandlordDashboard() {
   const [invoiceSearch, setInvoiceSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
+  // Settings (landlord's own sign-in details)
+  const [settingsForm, setSettingsForm] = useState({
+    username: context?.landlordCreds?.username || '',
+    currentPassword: '', newPassword: '', confirmPassword: '',
+  });
+
   if (!context) {
     return <div style={{ padding: '2rem', textAlign: 'center' }}><h2>Loading… Please refresh.</h2></div>;
   }
 
-  const { currentUser, logout, addBuilding, updateBuilding, addRoom, updateRoom, addTenant, updateTenant, deactivateTenant, generateInvoice, acceptPayment, updateInvoice, voidInvoice, deleteInvoice, maintenanceRequests, updateMaintenanceRequest } = context;
+  const { currentUser, logout, landlordCreds, updateLandlordCredentials, addBuilding, updateBuilding, addRoom, updateRoom, addTenant, updateTenant, deactivateTenant, generateInvoice, acceptPayment, updateInvoice, voidInvoice, deleteInvoice, maintenanceRequests, updateMaintenanceRequest } = context;
   const buildings = (Array.isArray(context.buildings) ? context.buildings : []).filter(Boolean);
   const rooms = (Array.isArray(context.rooms) ? context.rooms : []).filter(Boolean);
   const tenants = (Array.isArray(context.tenants) ? context.tenants : []).filter(Boolean);
@@ -826,6 +832,55 @@ function LandlordDashboard() {
     );
   };
 
+  const handleSettingsSubmit = (e) => {
+    e.preventDefault();
+    if (!settingsForm.username.trim()) { alert('Please enter a username.'); return; }
+    if (settingsForm.currentPassword !== landlordCreds.password) { alert('Your current password is not correct.'); return; }
+    let newPass = landlordCreds.password;
+    if (settingsForm.newPassword) {
+      if (settingsForm.newPassword.length < 4) { alert('New password must be at least 4 characters.'); return; }
+      if (settingsForm.newPassword !== settingsForm.confirmPassword) { alert('The new passwords do not match.'); return; }
+      newPass = settingsForm.newPassword;
+    }
+    updateLandlordCredentials(settingsForm.username, newPass);
+    setSettingsForm({ username: settingsForm.username.trim(), currentPassword: '', newPassword: '', confirmPassword: '' });
+    alert('Saved! Use your new details next time you sign in.');
+  };
+
+  const renderSettings = () => (
+    <div className="fade-in">
+      <h2 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '2rem' }}>Settings</h2>
+      <div className="glass-panel" style={{ padding: '2rem', maxWidth: '560px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
+          <KeyRound size={22} color={BLUE} />
+          <h3>Change Your Username & Password</h3>
+        </div>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '1rem' }}>
+          This is how you sign in. Your username right now is <strong>{landlordCreds?.username}</strong>. Enter your current password to make changes.
+        </p>
+        <form onSubmit={handleSettingsSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+          <div>
+            <label className="input-label">Username</label>
+            <input className="input-field" value={settingsForm.username} onChange={e => setSettingsForm({ ...settingsForm, username: e.target.value })} required />
+          </div>
+          <div>
+            <label className="input-label">Current Password</label>
+            <input type="password" className="input-field" placeholder="Enter your current password" value={settingsForm.currentPassword} onChange={e => setSettingsForm({ ...settingsForm, currentPassword: e.target.value })} required />
+          </div>
+          <div>
+            <label className="input-label">New Password <span style={{ color: 'var(--text-muted)', fontWeight: 400, fontSize: '0.9rem' }}>(leave blank to keep the same)</span></label>
+            <input type="password" className="input-field" placeholder="New password" value={settingsForm.newPassword} onChange={e => setSettingsForm({ ...settingsForm, newPassword: e.target.value })} />
+          </div>
+          <div>
+            <label className="input-label">Confirm New Password</label>
+            <input type="password" className="input-field" placeholder="Type the new password again" value={settingsForm.confirmPassword} onChange={e => setSettingsForm({ ...settingsForm, confirmPassword: e.target.value })} />
+          </div>
+          <button className="btn btn-primary" type="submit" style={{ marginTop: '0.5rem' }}><CheckCircle size={20} /> Save Changes</button>
+        </form>
+      </div>
+    </div>
+  );
+
   const NavItem = ({ tabId, icon: Icon, label, badge }) => (
     <button
       onClick={() => setActiveTab(tabId)}
@@ -861,6 +916,7 @@ function LandlordDashboard() {
           <NavItem tabId="billings" icon={DollarSign} label="Bills" />
           <NavItem tabId="requests" icon={ClipboardList} label="Payments to Approve" badge={paymentRequestCount} />
           <NavItem tabId="maintenance" icon={Wrench} label="Repairs" badge={openMaintenanceCount} />
+          <NavItem tabId="settings" icon={Settings} label="Settings" />
         </nav>
 
         <div className="signout" style={{ marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
@@ -878,6 +934,7 @@ function LandlordDashboard() {
         {activeTab === 'billings' && renderBillings()}
         {activeTab === 'requests' && renderRequests()}
         {activeTab === 'maintenance' && renderMaintenance()}
+        {activeTab === 'settings' && renderSettings()}
       </div>
     </div>
   );

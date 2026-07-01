@@ -29,7 +29,7 @@ function Login() {
        if (user && user.role === 'landlord') {
           window.location.href = '/landlord';
        } else {
-          setError('Wrong username or password. Try username "landlord" and password "123456".');
+          setError('Wrong username or password. Please check and try again.');
        }
     } else {
        if (user && user.role === 'tenant') {

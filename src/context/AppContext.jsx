@@ -48,6 +48,10 @@ export const AppProvider = ({ children }) => {
   // Tenant-reported maintenance issues.
   const [maintenanceRequests, setMaintenanceRequests] = useState(loadState('maintenanceRequests', []));
 
+  // Landlord sign-in details (changeable in Settings). Defaults to the
+  // original hardcoded login until the landlord changes them.
+  const [landlordCreds, setLandlordCreds] = useState(loadState('landlordCreds', { username: 'landlord', password: '123456' }));
+
   // Save to local storage on change
   // Removed currentUser auto-sync to avoid Vite ghost module memory leak
   useEffect(() => localStorage.setItem('buildings', JSON.stringify(buildings)), [buildings]);
@@ -55,10 +59,11 @@ export const AppProvider = ({ children }) => {
   useEffect(() => localStorage.setItem('tenants', JSON.stringify(tenants)), [tenants]);
   useEffect(() => localStorage.setItem('invoices', JSON.stringify(invoices)), [invoices]);
   useEffect(() => localStorage.setItem('maintenanceRequests', JSON.stringify(maintenanceRequests)), [maintenanceRequests]);
+  useEffect(() => localStorage.setItem('landlordCreds', JSON.stringify(landlordCreds)), [landlordCreds]);
 
   // Actions
   const login = (phone, password) => {
-    if (phone === 'landlord' && password === '123456') {
+    if (phone === landlordCreds.username && password === landlordCreds.password) {
       const u = { role: 'landlord', id: 'admin' };
       localStorage.setItem('currentUser', JSON.stringify(u));
       setCurrentUser(u);
@@ -77,6 +82,11 @@ export const AppProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('currentUser');
     setCurrentUser(null);
+  };
+
+  // Change the landlord's own sign-in username and/or password.
+  const updateLandlordCredentials = (username, password) => {
+    setLandlordCreds({ username: String(username).trim(), password });
   };
 
   const addBuilding = (b) => {
@@ -363,6 +373,7 @@ export const AppProvider = ({ children }) => {
   return (
     <AppContext.Provider value={{
       currentUser, login, logout,
+      landlordCreds, updateLandlordCredentials,
       buildings, addBuilding, updateBuilding,
       rooms, addRoom, updateRoom,
       tenants, addTenant, updateTenant, updateTenantPassword, addTenantDocs, deactivateTenant,
