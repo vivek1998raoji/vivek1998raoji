@@ -32,6 +32,18 @@ export const formatDate = (iso) => {
 export const currentMonthName = () => MONTHS[new Date().getMonth()];
 export const currentYear = () => new Date().getFullYear();
 
+// Plain-English labels for invoice statuses (no jargon like "rolled over").
+export const STATUS_LABELS = {
+  pending: 'Not Paid',
+  partially_paid: 'Part Paid',
+  paid: 'Paid',
+  payment_requested: 'Payment Claimed',
+  rolled_over: 'Moved to New Bill',
+  void: 'Cancelled',
+};
+export const statusLabel = (s) =>
+  STATUS_LABELS[s] || String(s || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
 // Add N days to an ISO date, return ISO date string.
 export const addDays = (iso, days) => {
   const d = iso ? new Date(iso) : new Date();
