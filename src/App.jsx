@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import LandlordDashboard from './pages/LandlordDashboard';
 import TenantDashboard from './pages/TenantDashboard';
+import PatientForm from './patientform/PatientForm';
+import DoctorLogin from './patientform/DoctorLogin';
+import DoctorDashboard from './patientform/DoctorDashboard';
 import { AppProvider } from './context/AppContext';
 import './index.css';
 
@@ -40,6 +43,14 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/landlord" element={<LandlordDashboard />} />
               <Route path="/tenant" element={<TenantDashboard />} />
+
+              {/* Patient intake (Cold & Flu symptom form) — separate module.
+                  /intake        = public form the doctor shares with patients
+                  /clinic/login  = doctor login
+                  /clinic        = doctor dashboard (patient-wise submissions) */}
+              <Route path="/intake" element={<PatientForm />} />
+              <Route path="/clinic/login" element={<DoctorLogin />} />
+              <Route path="/clinic" element={<DoctorDashboard />} />
             </Routes>
           </div>
         </Router>
